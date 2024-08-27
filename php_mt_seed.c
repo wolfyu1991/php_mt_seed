@@ -11,8 +11,8 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <stdio.h>
-#include <unistd.h> /* sysconf() */
-#include <sys/times.h>
+// #include <unistd.h> /* sysconf() */
+#include <time.h>
 #include <assert.h>
 
 #if defined(__MIC__) || defined(__AVX512F__)
@@ -631,7 +631,7 @@ static uint64_t crack(const match_t *match)
 	version_t flavor;
 	long clk_tck;
 	clock_t start_time;
-	struct tms tms;
+	// struct tms tms;
 
 	flavor = PHP_LEGACY;
 	do {
@@ -639,14 +639,15 @@ static uint64_t crack(const match_t *match)
 
 		fprintf(stderr, "Version: %s\n", flavors[flavor]);
 
-		clk_tck = sysconf(_SC_CLK_TCK);
-		start_time = times(&tms);
+		// clk_tck = sysconf(_SC_CLK_TCK);
+		clk_tck = 1000;
+		start_time = clock();
 
 		top = 0x40000000 >> (P - 2 + shift);
 		for (base = 0; base < top; base += step) {
 			uint32_t start = base << (P + shift);
 			uint32_t next = (base + step) << (P + shift);
-			clock_t running_time = times(&tms) - start_time;
+			clock_t running_time = clock() - start_time;
 			fprintf(stderr,
 			    "\rFound %llu, trying 0x%08x - 0x%08x, "
 			    "speed %.1f Mseeds/s ",
